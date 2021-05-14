@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----vignette-setup, include = FALSE------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -31,7 +31,7 @@ data("site_sp_plants", package = "fundiversity")
 head(site_sp_plants)[, 1:5]
 
 ## ----not-enough-species, error=TRUE-------------------------------------------
-# Fewer traits than species in the site-species matrix
+# Fewer species in trait dataset than species in the site-species matrix
 fd_fric(traits_birds[2:217,], site_sp_birds)
 
 # Fewer species in the site-species matrix than in the traits
@@ -44,7 +44,7 @@ fd_fric(traits_birds[1:5,], site_sp_birds[, 6:10])
 # Range of bill width in the birds dataset
 diff(range(traits_birds[, "Bill.width..mm."]))
 
-# Computation with fundiversity::fd_ric.
+# Using fundiversity::fd_fric()
 fd_fric(traits_birds)
 
 ## ----fric-nd------------------------------------------------------------------
@@ -58,6 +58,15 @@ fd_fric(traits_birds, stand = TRUE)
 
 ## ----fric-stand-sites---------------------------------------------------------
 fd_fric(traits_birds, site_sp_birds, stand = TRUE)
+
+## ----fric-intersect-intro-----------------------------------------------------
+fd_fric_intersect(traits_birds)
+
+## ----fric-intersect-all-------------------------------------------------------
+fd_fric_intersect(traits_birds, site_sp_birds[1:2,])
+
+## ----fric-intersect-stand-----------------------------------------------------
+fd_fric_intersect(traits_birds, site_sp_birds[1:2,], stand = TRUE)
 
 ## ----fdiv-intro---------------------------------------------------------------
 # One-dimension FDiv
@@ -79,10 +88,16 @@ fd_feve(traits_birds)
 ## ----feve-sites---------------------------------------------------------------
 fd_feve(traits_birds, site_sp_birds)
 
+## ----fdis-intro---------------------------------------------------------------
+fd_fdis(traits_birds)
+
+## ----fdis-sites---------------------------------------------------------------
+fd_fdis(traits_birds, site_sp_birds)
+
 ## ----raoq-intro---------------------------------------------------------------
 fd_raoq(traits_birds)
 
-## ----raoq-site----------------------------------------------------------------
+## ----raoq-sites---------------------------------------------------------------
 fd_raoq(traits_birds, site_sp_birds)
 
 ## ----raoq-dissim--------------------------------------------------------------

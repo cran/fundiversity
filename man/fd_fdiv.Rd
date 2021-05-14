@@ -12,8 +12,7 @@ fd_fdiv(traits, sp_com)
 \item{sp_com}{Site-species matrix with sites as rows and species as columns
 if not provided, the function considers all species with equal
 abundance in a single site. This can be either a \code{matrix},
-a \code{data.frame}, or a \code{\link[Matrix:Matrix]{Matrix::Matrix()}} object.
-package.}
+a \code{data.frame}, or a \code{\link[Matrix:Matrix]{Matrix::Matrix()}} object.}
 }
 \value{
 a data.frame with two columns:
@@ -25,6 +24,23 @@ a data.frame with two columns:
 \description{
 Compute Functional Divergence (FDiv)
 }
+\details{
+By default, when loading \code{fundiversity}, the functions to compute
+convex hulls are \href{https://en.wikipedia.org/wiki/Memoization}{memoised}
+through the \code{memoise} package if it is installed. To deactivate this behavior
+you can set the option \code{fundiversity.memoise} to \code{FALSE} by running the
+following line: \code{options(fundiversity.memoise = FALSE)}.
+If you use it interactively it will only affect your current session.
+Add it to your script(s) or \code{.Rprofile} file to avoid toggling it each time.
+}
+\section{Parallelization}{
+
+The computation of this function can be parallelized thanks to
+\code{\link[future:plan]{future::plan()}}. To get more information on how to parallelize your
+computation please refer to the parallelization vignette with:
+\code{vignette("parallel", package = "fundiversity")}
+}
+
 \examples{
 data(traits_birds)
 fd_fdiv(traits_birds)
