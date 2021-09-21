@@ -20,18 +20,21 @@ a data.frame with two columns:
 \item \code{site} the names of the sites as the row names of the input \code{sp_com},
 \item \code{FDiv} the values of functional divergence at each site.
 }
+
+NB: when a site contains no species FDiv is equal to 0.
 }
 \description{
 Compute Functional Divergence (FDiv)
 }
 \details{
-By default, when loading \code{fundiversity}, the functions to compute
-convex hulls are \href{https://en.wikipedia.org/wiki/Memoization}{memoised}
-through the \code{memoise} package if it is installed. To deactivate this behavior
-you can set the option \code{fundiversity.memoise} to \code{FALSE} by running the
-following line: \code{options(fundiversity.memoise = FALSE)}.
-If you use it interactively it will only affect your current session.
-Add it to your script(s) or \code{.Rprofile} file to avoid toggling it each time.
+By default, when loading \pkg{fundiversity}, the functions to
+compute convex hulls are
+\href{https://en.wikipedia.org/wiki/Memoization}{memoised} through the \code{memoise}
+package if it is installed. To deactivate this behavior you can set the
+option \code{fundiversity.memoise} to \code{FALSE} by running the following line:
+\code{options(fundiversity.memoise = FALSE)}. If you use it interactively it will
+only affect your current session. Add it to your script(s) or \code{.Rprofile}
+file to avoid toggling it each time.
 }
 \section{Parallelization}{
 

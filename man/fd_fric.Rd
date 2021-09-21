@@ -28,19 +28,23 @@ a data.frame with two columns:
 \item \code{site} the names of the sites as the row names of the input \code{sp_com},
 \item \code{FRic} the values of functional richness at each site.
 }
+
+NB: FRic is equal to \code{NA} when there are strictly less species in a site
+than the number of provided traits.
 }
 \description{
 Functional Richness is computed as the volume of the convex hull from all
 included traits.
 }
 \details{
-By default, when loading \code{fundiversity}, the functions to compute
-convex hulls are \href{https://en.wikipedia.org/wiki/Memoization}{memoised}
-through the \code{memoise} package if it is installed. To deactivate this behavior
-you can set the option \code{fundiversity.memoise} to \code{FALSE} by running the
-following line: \code{options(fundiversity.memoise = FALSE)}.
-If you use it interactively it will only affect your current session.
-Add it to your script(s) or \code{.Rprofile} file to avoid toggling it each time.
+By default, when loading \pkg{fundiversity}, the functions to
+compute convex hulls are
+\href{https://en.wikipedia.org/wiki/Memoization}{memoised} through the \code{memoise}
+package if it is installed. To deactivate this behavior you can set the
+option \code{fundiversity.memoise} to \code{FALSE} by running the following line:
+\code{options(fundiversity.memoise = FALSE)}. If you use it interactively it will
+only affect your current session. Add it to your script(s) or \code{.Rprofile}
+file to avoid toggling it each time.
 }
 \section{Parallelization}{
 

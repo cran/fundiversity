@@ -30,6 +30,9 @@ a data.frame with three columns:
 \item \code{FRic_intersect} the volume of the convex hulls intersection of each
 pair of site.
 }
+
+NB: FRic_intersect is equal to \code{NA} when there are strictly less species in
+one of the sites than the number of provided traits.
 }
 \description{
 Compute volume of the intersection of the convex hulls of all pairs
@@ -39,13 +42,14 @@ this function uses the convex hull of all provided traits,
 thus standardized volume of self-intersection hulls can be lower than one.
 }
 \details{
-By default, when loading \code{fundiversity}, the functions to compute
-convex hulls are \href{https://en.wikipedia.org/wiki/Memoization}{memoised}
-through the \code{memoise} package if it is installed. To deactivate this behavior
-you can set the option \code{fundiversity.memoise} to \code{FALSE} by running the
-following line: \code{options(fundiversity.memoise = FALSE)}.
-If you use it interactively it will only affect your current session.
-Add it to your script(s) or \code{.Rprofile} file to avoid toggling it each time.
+By default, when loading \pkg{fundiversity}, the functions to
+compute convex hulls are
+\href{https://en.wikipedia.org/wiki/Memoization}{memoised} through the \code{memoise}
+package if it is installed. To deactivate this behavior you can set the
+option \code{fundiversity.memoise} to \code{FALSE} by running the following line:
+\code{options(fundiversity.memoise = FALSE)}. If you use it interactively it will
+only affect your current session. Add it to your script(s) or \code{.Rprofile}
+file to avoid toggling it each time.
 }
 \section{Parallelization}{
 
