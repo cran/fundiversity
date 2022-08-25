@@ -3,7 +3,10 @@
 #' Functional Richness is computed as the volume of the convex hull from all
 #' included traits.
 #'
-#' @param traits The matrix dataset for which you want to compute the index
+#' @param traits Trait matrix with species as rows and traits as columns.
+#'               It has to contain exclusively numerical values. This can be
+#'               either a `matrix`, a `data.frame`, or a [Matrix::Matrix()]
+#'               object.
 #' @param sp_com Site-species matrix with sites as rows and species as columns
 #'               if not provided, the function considers all species with equal
 #'               abundance in a single site. This can be either a `matrix`,
@@ -51,12 +54,17 @@
 #' @export
 fd_fric <- function(traits, sp_com, stand = FALSE) {
 
-  if (missing(traits) | is.null(traits)) {
+  if (missing(traits) || is.null(traits)) {
     stop("Please provide a trait dataset", call. = FALSE)
   }
 
-  if (is.data.frame(traits) | is.vector(traits)) {
+  if (is.data.frame(traits) || is.vector(traits)) {
     traits <- as.matrix(traits)
+  }
+
+  if (!is.numeric(traits)) {
+    stop("Non-continuous trait data found in input traits. ",
+         "Please provide only continuous trait data", call. = FALSE)
   }
 
   if (ncol(traits) > 16) {
@@ -90,7 +98,7 @@ fd_fric <- function(traits, sp_com, stand = FALSE) {
 
   fric_site <- future_apply(sp_com, 1, function(site_row) {
     fd_chull(traits[site_row > 0,, drop = FALSE])$vol
-  })
+  }, future.globals = FALSE)
 
   data.frame(site = rownames(sp_com), FRic = fric_site/max_range,
              row.names = NULL)
