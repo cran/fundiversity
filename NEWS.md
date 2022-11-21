@@ -1,3 +1,27 @@
+# fundiversity 1.1.0
+
+##  Minor changes
+
+* Change vignette names and indexing so that they are ordered similarly on the
+pkgdown website, on CRAN, and using `vignette`. Vignettes are renamed
+`fundiversity_X-topic.Rmd` but the overview vignette `fundiversity.Rmd`.
+* Fully replace all URLs still pointing to
+https://github.com/bisaloo/fundiversity to
+https://github.com/funecology/fundiversity
+* Update documentation of `fd_*()` functions for edge cases and arguments.
+* Fix unuseful argument in `remove_species_without_traits()` that would display
+`FALSE` at the end of each message.
+* Update parallel vignette with list of parallelizable function at the top and
+explain that vignette is pre-computed.
+* Update performance/benchmark vignette to reflect actually ran benchmark in
+manuscript.
+
+## Bug fixes
+
+* Fix a bug in the computation of `fd_fdis()` because of a misplaced square.
+**NB**: All FDis computation done with it to this day were wrong.
+
+
 # fundiversity 1.0.0
 
 ## Internal changes
@@ -34,7 +58,7 @@ convex hulls across pairs of sites.
 * There is a new function `fd_fdis` to compute Functional Dispersion FDis.
 * `fd_fdiv()`, `fd_feve()`,  `fd_fdis()`, `fd_fric()` can now be computed in
 parallel with the [future](https://cran.r-project.org/package=future) framework. 
-Please refer to the [parallelization vignette for more information](https://hugogruson.fr/fundiversity/articles/parallel.html).
+Please refer to the [parallelization vignette for more information](https://funecology.github.io/fundiversity/articles/fundiversity_1-parallel.html).
 * The convex hull computation in `fd_fdiv()`, `fd_fric()`, and 
 `fd_fric_intersect()` is now cached thanks to the 
 [memoise](https://memoise.r-lib.org/) package to speed up repeated runs. This 

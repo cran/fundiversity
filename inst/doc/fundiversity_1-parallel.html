@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>2. Parallelize Computation of Indices</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">2. Parallelize Computation of Indices</h1>
+
+
+
+<!-- 
+# Pre-render with 
+knitr::knit("vignettes/_fundiversity_1-parallel.Rmd", output = "vignettes/fundiversity_1-parallel.Rmd")
+-->
+<p>Note: This vignette presents some performance tests ran between
+non-parallel and parallel versions of <code>fundiversity</code>
+functions. Note that to avoid the dependency on other packages, this
+vignette is <a href="https://ropensci.org/technotes/2019/12/08/precompute-vignettes/"><strong>pre-computed</strong></a>.</p>
+<p>Within <code>fundiversity</code> the computation of most indices can
+be parallelized using the <code>future</code> package. The indices that
+currently support parallelization are: <strong>FRic</strong>,
+<strong>FDis</strong>, <strong>FDiv</strong>, and <strong>FEve</strong>.
+The goal of this vignette is to explain how to toggle and use
+parallelization in <code>fundiversity</code>.</p>
+<p>The <code>future</code> package provides a simple and general
+framework to allow asynchronous computation depending on the resources
+available for the user. The <a href="https://cran.r-project.org/package=future">first vignette of
+<code>future</code></a> gives a general overview of all its features.
+The main idea being that the user should write the code once and that it
+would run seamlessly sequentially, or in parallel on a single computer,
+or on a cluster, or distributed over several computers.
+<code>fundiversity</code> can thus run on all these different backends
+following the user’s choice.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;fundiversity&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;traits_birds&quot;</span>, <span class="at">package =</span> <span class="st">&quot;fundiversity&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;site_sp_birds&quot;</span>, <span class="at">package =</span> <span class="st">&quot;fundiversity&quot;</span>)</span></code></pre></div>
+<div id="running-code-in-parallel" class="section level1">
+<h1>Running code in parallel</h1>
+<p>By default the <code>fundiversity</code> code will run sequentially
+on a single core. To trigger parallelization the user needs to define a
+<code>future::plan()</code> object with a parallel backend such as
+<code>future::multisession</code> to split the execution across multiple
+R sessions.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sequential execution</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fric1 <span class="ot">&lt;-</span> <span class="fu">fd_fric</span>(traits_birds)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Parallel execution</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multisession)  <span class="co"># Plan definition</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>fric2 <span class="ot">&lt;-</span> <span class="fu">fd_fric</span>(traits_birds)  <span class="co"># The code resolve in similar fashion</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(fric1, fric2)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>Within the <code>future::multisession</code> backend you can specify
+the number of cores on which the function should be parallelized over
+through the argument <code>workers</code>, you can change it in the
+<code>future::plan()</code> call:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multisession, <span class="at">workers =</span> <span class="dv">2</span>)  <span class="co"># Only 2 cores are used</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fric3 <span class="ot">&lt;-</span> <span class="fu">fd_fric</span>(traits_birds)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(fric3, fric2)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>To learn more about the different backends available and the related
+arguments needed, please refer to the documentation of
+<code>future::plan()</code> and the <a href="https://cran.r-project.org/package=future">overview vignette of
+<code>future</code></a>.</p>
+</div>
+<div id="performance-comparison" class="section level1">
+<h1>Performance comparison</h1>
+<p>We can now compare the difference in performance to see the
+performance gain thanks to parallelization:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>sequential)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>non_parallel_bench <span class="ot">&lt;-</span> microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">non_parallel =</span> {</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fd_fric</span>(traits_birds)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">20</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multisession)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>parallel_bench <span class="ot">&lt;-</span> microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel =</span> {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fd_fric</span>(traits_birds)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">20</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(non_parallel_bench, parallel_bench)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          expr       min         lq       mean     median         uq       max neval cld</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  non_parallel  8.756378   8.892243   9.841818   9.072241   9.218554   23.9519    20  a </span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      parallel 56.374332 167.680385 218.073077 172.888927 185.670312 1247.8534    20   b</span></span></code></pre></div>
+<p>The non parallelized code runs faster than the parallelized one!
+Indeed, the parallelization in <code>fundiversity</code> parallelize the
+computation across different sites. So parallelization should be used
+when you have many sites on which you want to compute similar
+indices.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to make a bigger site-sp dataset</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>make_more_sites <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  site_sp <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">replicate</span>(n, site_sp_birds, <span class="at">simplify =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames</span>(site_sp) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;s&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(site_sp)))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  site_sp</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>For example with a dataset 5000 times bigger:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bigger_site <span class="ot">&lt;-</span> <span class="fu">make_more_sites</span>(<span class="dv">5000</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">seq =</span> { </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>sequential) </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fd_fric</span>(traits_birds, bigger_site) </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">multisession =</span> { </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multisession, <span class="at">workers =</span> <span class="dv">4</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fd_fric</span>(traits_birds, bigger_site) </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">multicore =</span> { </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multicore, <span class="at">workers =</span> <span class="dv">4</span>) </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fd_fric</span>(traits_birds, bigger_site) </span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">times =</span> <span class="dv">20</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in supportsMulticoreAndRStudio(...): [ONE-TIME </span><span class="al">WARNING</span><span class="co">] Forked processing (&#39;multicore&#39;) is not supported when running R from RStudio</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; because it is considered unstable. For more details, how to control forked processing or not, and how to silence this warning in future R</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sessions, see ?parallelly::supportsMulticore</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: seconds</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          expr      min       lq     mean   median       uq      max neval cld</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           seq 15.58688 15.67587 15.97552 15.97047 16.24568 16.54392    20  a </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  multisession 21.17851 21.75313 22.02965 21.88691 22.26971 23.50062    20   b</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     multicore 15.53872 15.75567 16.06103 16.01595 16.35790 16.98102    20  a</span></span></code></pre></div>
+<details>
+<summary>
+Session info of the machine on which the benchmark was ran and time it
+took to run
+</summary>
+<pre><code>#&gt;  seconds needed to generate this document: 1095.27 sec elapsed
+#&gt; ─ Session info ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+#&gt;  setting  value
+#&gt;  version  R version 4.2.1 (2022-06-23)
+#&gt;  os       Ubuntu 20.04.5 LTS
+#&gt;  system   x86_64, linux-gnu
+#&gt;  ui       RStudio
+#&gt;  language (EN)
+#&gt;  collate  en_US.UTF-8
+#&gt;  ctype    en_US.UTF-8
+#&gt;  tz       Etc/UTC
+#&gt;  date     2022-11-15
+#&gt;  rstudio  2022.02.0+443 Prairie Trillium (server)
+#&gt;  pandoc   2.17.1.1 @ /usr/lib/rstudio-server/bin/quarto/bin/ (via rmarkdown)
+#&gt; 
+#&gt; ─ Packages ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+#&gt;  !  package        * version    date (UTC) lib source
+#&gt;  P  abind            1.4-5      2016-07-21 [3] CRAN (R 4.2.0)
+#&gt;     assertthat       0.2.1      2019-03-21 [3] CRAN (R 4.1.3)
+#&gt;     cachem           1.0.6      2021-08-19 [3] CRAN (R 4.1.3)
+#&gt;  VP cli              3.4.0      2022-09-23 [?] CRAN (R 4.2.1) (on disk 3.4.1)
+#&gt;     codetools        0.2-18     2020-11-04 [5] CRAN (R 4.0.3)
+#&gt;     colorspace       2.0-3      2022-02-21 [1] CRAN (R 4.2.0)
+#&gt;     crayon           1.5.1      2022-03-26 [1] CRAN (R 4.2.0)
+#&gt;     DBI              1.1.2      2021-12-20 [3] CRAN (R 4.1.3)
+#&gt;  P  digest           0.6.29     2021-12-01 [3] CRAN (R 4.2.0)
+#&gt;     dplyr          * 1.0.10     2022-09-01 [1] CRAN (R 4.2.1)
+#&gt;     ellipsis         0.3.2      2021-04-29 [1] CRAN (R 4.2.0)
+#&gt;     evaluate         0.18       2022-11-07 [1] CRAN (R 4.2.1)
+#&gt;     fansi            1.0.3      2022-03-24 [1] CRAN (R 4.2.0)
+#&gt;  P  fastmap          1.1.0      2021-01-25 [3] CRAN (R 4.2.1)
+#&gt;     fundiversity   * 0.2.1.9000 2022-04-12 [3] Github (bisaloo/fundiversity@87652ba)
+#&gt;  VP future           1.26.1     2022-09-02 [3] CRAN (R 4.2.1) (on disk 1.28.0)
+#&gt;  VP future.apply     1.9.0      2022-11-05 [3] CRAN (R 4.2.1) (on disk 1.10.0)
+#&gt;     generics         0.1.2      2022-01-31 [1] CRAN (R 4.2.0)
+#&gt;  P  geometry         0.4.6      2022-04-18 [3] CRAN (R 4.2.0)
+#&gt;     ggplot2        * 3.3.6      2022-05-03 [1] CRAN (R 4.2.0)
+#&gt;  VP globals          0.15.0     2022-08-28 [3] CRAN (R 4.2.1) (on disk 0.16.1)
+#&gt;     glue             1.6.2      2022-02-24 [1] CRAN (R 4.2.0)
+#&gt;     gtable           0.3.0      2019-03-25 [1] CRAN (R 4.2.0)
+#&gt;     htmltools        0.5.3      2022-07-18 [1] CRAN (R 4.2.1)
+#&gt;     knitr            1.40       2022-08-24 [1] CRAN (R 4.2.1)
+#&gt;     lattice          0.20-45    2021-09-22 [3] CRAN (R 4.1.3)
+#&gt;     lifecycle        1.0.3      2022-10-07 [1] CRAN (R 4.2.1)
+#&gt;  P  listenv          0.8.0      2019-12-05 [3] CRAN (R 4.2.1)
+#&gt;  P  magic            1.6-0      2022-02-09 [3] CRAN (R 4.2.0)
+#&gt;     magrittr         2.0.3      2022-03-30 [1] CRAN (R 4.2.0)
+#&gt;     MASS             7.3-58.1   2022-08-03 [3] CRAN (R 4.2.1)
+#&gt;     Matrix           1.4-1      2022-03-23 [3] CRAN (R 4.1.3)
+#&gt;     memoise          2.0.1      2021-11-26 [3] CRAN (R 4.1.3)
+#&gt;     microbenchmark   1.4.9      2021-11-09 [3] CRAN (R 4.1.3)
+#&gt;     multcomp         1.4-19     2022-04-26 [1] CRAN (R 4.2.0)
+#&gt;     munsell          0.5.0      2018-06-12 [1] CRAN (R 4.2.0)
+#&gt;     mvtnorm          1.1-3      2021-10-08 [1] CRAN (R 4.2.0)
+#&gt;  VP parallelly       1.31.1     2022-07-21 [3] CRAN (R 4.2.1) (on disk 1.32.1)
+#&gt;     pillar           1.7.0      2022-02-01 [1] CRAN (R 4.2.0)
+#&gt;     pkgconfig        2.0.3      2019-09-22 [1] CRAN (R 4.2.0)
+#&gt;     R6               2.5.1      2021-08-19 [1] CRAN (R 4.2.0)
+#&gt;  P  Rcpp             1.0.8.3    2022-03-17 [3] CRAN (R 4.2.0)
+#&gt;     rlang            1.0.6      2022-09-24 [1] CRAN (R 4.2.1)
+#&gt;     rmarkdown        2.13       2022-03-10 [3] CRAN (R 4.1.3)
+#&gt;     rstudioapi       0.14       2022-08-22 [1] CRAN (R 4.2.1)
+#&gt;     sandwich         3.0-2      2022-06-15 [1] CRAN (R 4.2.0)
+#&gt;     scales           1.2.0      2022-04-13 [1] CRAN (R 4.2.0)
+#&gt;     sessioninfo      1.2.2      2021-12-06 [3] CRAN (R 4.1.3)
+#&gt;     stringi          1.7.6      2021-11-29 [1] CRAN (R 4.2.0)
+#&gt;     stringr          1.4.0      2019-02-10 [1] CRAN (R 4.2.0)
+#&gt;     survival         3.3-1      2022-03-03 [3] CRAN (R 4.1.3)
+#&gt;     TH.data          1.1-1      2022-04-26 [1] CRAN (R 4.2.0)
+#&gt;     tibble           3.1.7      2022-05-03 [1] CRAN (R 4.2.0)
+#&gt;     tictoc           1.0.1      2021-04-19 [3] CRAN (R 4.1.3)
+#&gt;     tidyselect       1.2.0      2022-10-10 [1] CRAN (R 4.2.1)
+#&gt;     utf8             1.2.2      2021-07-24 [1] CRAN (R 4.2.0)
+#&gt;     vctrs            0.5.0      2022-10-22 [1] CRAN (R 4.2.1)
+#&gt;     withr            2.5.0      2022-03-03 [1] CRAN (R 4.2.0)
+#&gt;     xfun             0.34       2022-10-18 [1] CRAN (R 4.2.1)
+#&gt;     yaml             2.3.6      2022-10-18 [1] CRAN (R 4.2.1)
+#&gt;     zoo              1.8-10     2022-04-15 [1] CRAN (R 4.2.0)
+#&gt; 
+#&gt;  [1] /home/ke76dimu/R-library/4.2
+#&gt;  [2] /usr/local/lib/R/site-library
+#&gt;  [3] /data/library/4.1
+#&gt;  [4] /usr/lib/R/site-library
+#&gt;  [5] /usr/lib/R/library
+#&gt; 
+#&gt;  V ── Loaded and on-disk version mismatch.
+#&gt;  P ── Loaded and on-disk path mismatch.
+#&gt; 
+#&gt; ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+</details>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,5 +1,8 @@
 #' Compute Functional Dispersion (FDis)
 #'
+#' This function computes Functional Dispersion (FDis) following Laliberté &
+#' Legendre (2010). NB: when a site contains no species FDis is equal to 0.
+#'
 #' @inheritParams fd_fdiv
 #'
 #' @inheritSection fd_fric Parallelization
@@ -62,7 +65,7 @@ fd_fdis <- function(traits, sp_com) {
 
   dists_centro <- future_apply(centros, 1, function(centro) {
 
-    sqrt(colSums(t(traits) - centro)^2)
+    sqrt(colSums((t(traits) - centro)^2))
 
   }, future.globals = FALSE)
 

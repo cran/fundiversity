@@ -1,0 +1,48 @@
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/fundiversity_conceptual_diagram}
+
+}
+
+\caption{\label{fig1}Conceptual diagram showing the input and typical ouput data from `fundiversity` functions. Input data are generally a site-species table and a species-traits table, and the output gives back a table of functional diversity index per site.}\label{fig:fig1-conceptual-diagram}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/fig1_sequential_benchmark}
+
+}
+
+\caption{\label{fig2}Timing comparison across functional diversity indices between packages. Each point represents the execution time of one run using a simulated dataset, the points are transparent and jittered to avoid overplotting. We here show the performance results considering only a single set of parameters with 4 traits, 500 species, and 100 sites, repeated 30 times.}\label{fig:fig2-benchmark-results}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/fig2_parallel_benchmark}
+
+}
+
+\caption{\label{fig3}Timing comparison between parallel and sequential version of fundiversity functions across functional diversity indices. Each point represents the execution time of one run using simulated datasets with fixed properties (4 traits, 100 sites, 500 species), the points are transparent and jittered to avoid overplotting. The parallel version ran across 6 cores.}\label{fig:fig3-benchmark-parallel}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/s1_external_comparison_full}
+
+}
+
+\caption{\label{figs1}Performance comparison across functions of different packages over a range of parameters (number of traits, species, and sites). Note that each combination of parameters ran 30 iterations. The lines show trends of execution time in function of number of sites of the input dataset.}\label{fig:fig-s1-benchmark-full}
+\end{figure}
+\efloatseparator
+ 
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/s2_internal_comparison_full}
+
+}
+
+\caption{\label{figs2}Performance comparison across internal functions over a range of parameters (number of traits, species, and sites) and different parallelization parameters. Note that each combination of parameters ran 20 iterations. The lines show trends of execution time in function of number of sites of the input dataset.}\label{fig:fig-s2-internal-full}
+\end{figure}

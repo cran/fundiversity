@@ -35,7 +35,7 @@ head(site_sp_plants)[, 1:5]
 fd_fric(traits_birds[2:217,], site_sp_birds)
 
 # Fewer species in the site-species matrix than in the traits
-fd_fric(traits_birds, site_sp_birds[, 1:5])
+fd_fric(traits_birds, site_sp_birds[, 1:60])
 
 # No species in common between both dataset
 fd_fric(traits_birds[1:5,], site_sp_birds[, 6:10])
